@@ -1,4 +1,3 @@
-
 from machine import I2C, Pin
 from DIYables_MicroPython_OLED import OLED_SSD1306_I2C
 import utime
@@ -63,26 +62,37 @@ devNum_bmp = [
 0x40
 ]
 
-def draw_bg(dev_num, adcData, state):
-    oled.clear_display()
+def draw_bg(dev_num, adcData, state, text1, text2, data):
     oled.draw_bitmap(3, 3, grid_bmp, 10, 10, 1)
     oled.draw_bitmap(122, 1, MKC_bmp, 5, 14, 1)
     oled.draw_rect(34, 0, 2, 63, 1) # main divider
     draw_devNum(dev_num)
     draw_flexion(adcData)
+    
+    oled.set_cursor(42, 0)
+    oled.println(text1.replace("\n", "\n       ")) # fix text looping to the beginning of the display
+    oled.set_cursor(42, 8)
+    oled.println(text2.replace("\n", "\n       "))
+    oled.set_cursor(42, 16)
+    oled.println(data.replace("\n", "\n       "))
+
     if state == 1: #states 0-2: not_connected, searching, connected
         oled.draw_bitmap(19, 3, mag_bmp, 10, 10, 1)
-    else if state == 2:
+    elif state == 2:
         oled.draw_bitmap(19, 3, chain_bmp, 10, 10, 1)
-    oled.display()
 
+def clear():
+    oled.clear_display()
+    
+def show():
+    oled.display()
+    utime.sleep(1)
 
 def draw_devNum(index):
     x = index%4*3+2
     y = floor(index/4)*3+2
     oled.draw_bitmap(x, y, devNum_bmp, 3, 3, 1)
     oled.display()
-    utime.sleep(.001)
 
 def draw_flexion(dataList):
     l=dataList.split(":")
