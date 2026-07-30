@@ -7,9 +7,9 @@ import network
 import espnow
 from machine import Pin, ADC, sleep, PWM
 
-adcEn = Pin(4, Pin.OUT) ##ADC SETUP##     high to enable joystick, low to enable finger flexers
+adcEn = Pin(2, Pin.OUT) ##ADC SETUP##     high to enable joystick, low to enable finger flexers
 a = ADC(3) # pinky finger                     joystick x
-b = ADC(2) # ring finger                      joystick y
+b = ADC(4) # ring finger                      joystick y
 c = ADC(1) # middle finger                    joystick button
 d = ADC(0) # index finger                     
 a.atten(ADC.ATTN_11DB)
@@ -22,10 +22,12 @@ sta.active(True)
 sta.disconnect()     
 espn = espnow.ESPNow()
 espn.active(True)
-pList = [b'0v\xf5\xa6Mh'] # add peers here, MAC address of peers' wifi interface [0-16 peers])
+pList = [b'0v\xf5\xa6Mh'] ####################################add peers here, MAC address of peers' wifi interface [0-16 peers])#########################################################
+pNames = ["led array"] #######################################add peer names here########################################################################################################
 for _ in range (0, 16):
     pList.append(b'00\x00\x0000') #ensure list is filled to prevent out-of-index err
-devNum = 15 # index to use when connecting to peers
+    pNames.append("N/A")
+devNum = 0 # index to use when connecting to peers
 
 i2c = I2C(0, scl=Pin(9), sda=Pin(8), freq=400000)  ##DISPLAY SETUP##
 oled = OLED_SSD1306_I2C(128, 64, i2c)
@@ -35,8 +37,8 @@ oled.set_text_size(1)
 
 state = 0
 adcData = "1:.43:.2:.7:.23:.9"
-t1 = f"{devNum+1:02}"+"/16"+" NMS :)" if devNum+1 == 16 else "" #(NMS is the best game ever :D )
-t2 = "machine error"
+t1 = f"{devNum+1: 2} " + pNames[devNum]
+t2 = ""
 t3 = ":D"
 
 handAdj = [3500, 3500, 3500, 3500] #############################################################ADJUST THRESHOLDS HERE#####################################################################
@@ -52,7 +54,7 @@ def poll(): # polls hand then joystick
         C1 = clamp(c.read()/handAdj[2], 0, 1)
         D1 = clamp(d.read()/handAdj[3], 0, 1)
         adcEn.value(1)# joystick poll
-        A2 = clamp(a.read()/joystickAdj[0], 0, 1) # convert to % flex
+        A2 = clamp(a.read()/joystickAdj[0], 0, 1) # convert to % flex=
         B2 = clamp(b.read()/joystickAdj[1], 0, 1)
         C2 = clamp(c.read()/joystickAdj[2], 0, 1)
         D2 = clamp(d.read()/joystickAdj[3], 0, 1)
@@ -64,18 +66,16 @@ def draw():
     show()
 
 def toggle_connect(): # this pauses the poll->send cycle
+    global state
     if state == 0:
         espn.add_peer(pList[devNum])
         state = 1
+        draw()
         exitnum = 0
-        while exitnum <= 5:
-            host, msg = e.recv()
-            if msg:             # msg == None if timeout in recv()
-                print(host, msg)
-                if host == pList[devNum]:
-                    state = 3
-                    break
-            exitnum += 1
+        host, msg = espn.recv(3000)
+        if msg:             # msg == None if timeout in recv()
+            if host == pList[devNum]:
+                state = 3
         state -= 1 # sneaky way to ensure state 0 or 2 based on connection
     else:
         espn.del_peer(pL[pIndex])
@@ -83,7 +83,10 @@ def toggle_connect(): # this pauses the poll->send cycle
 
 
 def send(): # sends data to oled then espnow
-    print(":)")
+    if state == 2:
+        espn.send(pL[pI], f"{a}:{b}:{c}:{d}")
 
 print(poll())
-
+draw()
+toggle_connect()
+draw()
