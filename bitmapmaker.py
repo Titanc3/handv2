@@ -13,22 +13,24 @@ i = 0
 if width%8 == 0:
     for y in range(0, height):
         for x in range(0, width):
+            i += 1
             
+                
+            if pixels[x, y][0] == 0: # dark = bit
+                bitstring += "1"
+
+            else:
+                bitstring += "0"
+                
             if i == 8:
                 val = 0
                 for num in range (1, 9):
                     val += int(bitstring[-num])*(2**(num-1))
                 bitstring = ""
-                lineHex += str(hex(val).ljust(4, "0"))+ ", "
+                a = str(hex(val))
+                lineHex += a if len(a) == 4 else "0x0"+a[-1]
+                lineHex += ", "
                 i = 0
-                
-            if pixels[x, y][0] == 0:
-                bitstring += "0"
-
-            else:
-                bitstring += "1"
-                
-            i += 1
             
         output+=lineHex+"\n"
         
@@ -40,5 +42,5 @@ else:
         
 print(output)
         
-print(width)
-print(height)
+print("thanks for using my img to bitmap converter :)")
+print("until next time :D")
