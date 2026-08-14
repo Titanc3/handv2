@@ -252,7 +252,6 @@ def clear():
     
 def show():
     oled.display()
-    utime.sleep(1)
 
 def draw_devNum(index):
     x = index%4*3+18
@@ -261,42 +260,43 @@ def draw_devNum(index):
     oled.display()
 
 def draw_flexion(dataList):
-    l=dataList.split(":")
+    l=dataList.split(":")[:4][::-1] # trim and flip list
     
     for x in range (0, 4):
         oled.draw_rect((x*2+121), int(47-float(l[x])*47)+16, 1, 48, 1)
 
-oled.fill_screen(0)
-for w in range (0, 9):
-    for x in range(0, 5):
-        x1=x*19+25
-        for y in range(0, 5):
-            y1=y*10+11
-            if (x+y)%2 == 1:
-                pass
-            else:
-                draw_hexagon(x1, y1, 22-(w*2), 1)
-    oled.display()
-    utime.sleep(.1)
-    
 
-for w in range (0, 9):
-    hexnum = 0
-    for y in range(0, 5):
-        y1=y*10+11
+def splashScreen():
+    for w in range (0, 9):
         for x in range(0, 5):
             x1=x*19+25
-            if (x+y)%2 == 1:
-                pass
-            else:
-                hexnum += 1
-                draw_hexagon(x1, y1, 4+(w*2), 0)
-                if hexnum == 6 or hexnum == 8:
+            for y in range(0, 5):
+                y1=y*10+11
+                if (x+y)%2 == 1:
                     pass
                 else:
-                    oled.draw_bitmap(x1-7, y1-4, splash_chars[hexnum-1], 16, 10, 1)
-    oled.display()
-    utime.sleep(.1)
-utime.sleep(3)
+                    draw_hexagon(x1, y1, 22-(w*2), 1)
+        oled.display()
+        utime.sleep(.1)
+        
+
+    for w in range (0, 9):
+        hexnum = 0
+        for y in range(0, 5):
+            y1=y*10+11
+            for x in range(0, 5):
+                x1=x*19+25
+                if (x+y)%2 == 1:
+                    pass
+                else:
+                    hexnum += 1
+                    draw_hexagon(x1, y1, 4+(w*2), 0)
+                    if hexnum == 6 or hexnum == 8:
+                        pass
+                    else:
+                        oled.draw_bitmap(x1-7, y1-4, splash_chars[hexnum-1], 16, 10, 1)
+        oled.display()
+        utime.sleep(.1)
+    utime.sleep(3)
 
 
